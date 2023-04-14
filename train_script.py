@@ -1,4 +1,5 @@
 import os
+import shutil
 
 import evaluate
 import numpy as np
@@ -19,9 +20,11 @@ device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cp
 model_name = "MoritzLaurer/multilingual-MiniLMv2-L6-mnli-xnli"
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 
-
+if os.path.isdir("/home/viethd/.cache/huggingface/datasets/j_xdataset/Junction/0.1.0/"):
+    shutil.rmtree("/home/viethd/.cache/huggingface/datasets/j_xdataset/Junction/0.1.0/")
 dataset = load_dataset(os.path.abspath("JXdataset.py"), "Junction")
 
+print(dataset)
 
 def preprocess_function(examples):
     return tokenizer(examples["text"], truncation=True)
@@ -59,7 +62,7 @@ training_args = TrainingArguments(
     load_best_model_at_end=True,
     do_eval=True,
     do_train=True,
-    overwrite_output_dir=True,
+    overwrite_output_dir=True
 )
 
 trainer = Trainer(
