@@ -1,0 +1,5 @@
+transformers
+optimum[onnxruntime]
+datasets
+torch
+sklearn
