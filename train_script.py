@@ -17,7 +17,8 @@ from JXdataset import LABEL_LIST
 print(LABEL_LIST)
 device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
-model_name = "microsoft/Multilingual-MiniLM-L12-H384"
+
+model_name = "MoritzLaurer/multilingual-MiniLMv2-L6-mnli-xnli"
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 
 if os.path.isdir("/home/viethd/.cache/huggingface/datasets/j_xdataset/Junction/0.1.0/"):
@@ -42,6 +43,7 @@ def compute_metrics(eval_pred):
     predictions = np.argmax(predictions, axis=1)
     results = f1_metric.compute(predictions=predictions, references=labels, average=None)
     return {
+        "overall": np.sum(results["f1"]),
         LABEL_LIST[0]: results["f1"][0],
         LABEL_LIST[1]: results["f1"][1],
         LABEL_LIST[2]: results["f1"][2],
@@ -55,16 +57,16 @@ label2id = {v: k for k, v in enumerate(LABEL_LIST)}
 model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=3, id2label=id2label, label2id=label2id)
 
 training_args = TrainingArguments(
-    output_dir="junction-test",
+    output_dir="junction-mli",
     learning_rate=2e-5,
     per_device_train_batch_size=16,
     per_device_eval_batch_size=16,
-    num_train_epochs=20,
+    num_train_epochs=30,
     save_total_limit=3,
     weight_decay=0.01,
     evaluation_strategy="epoch",
     save_strategy="epoch",
-    # metric_for_best_model="",
+    metric_for_best_model="overall",
     load_best_model_at_end=True,
     do_eval=True,
     do_train=True,
