@@ -7,6 +7,9 @@ import glob
 import datasets
 
 from PIL import Image
+import re
+
+import unicodedata
 
 logger = datasets.logging.get_logger(__name__)
 
@@ -14,9 +17,16 @@ logger = datasets.logging.get_logger(__name__)
 _DESCRIPTION = """\
 Generated data for Junction Hackathon
 """
-train_file_path = "/home/viethd/workspace/junction/data/"
-eval_file_path = "/home/viethd/workspace/junction/data/"
+train_file_path = "/home/viethd/workspace/junction/data/train/"
+eval_file_path = "/home/viethd/workspace/junction/data/validation/"
 LABEL_LIST = [p.split('.')[0] for p in os.listdir(train_file_path)]
+
+def refine_string(s: str) -> str:
+    s = re.sub("\b", " ", s)
+    s = re.sub("\s+", " ", s)
+    s = unicodedata.normalize("NFC", s).strip()
+    return s
+
 
 class JunctionConfig(datasets.BuilderConfig):
     """BuilderConfig for Junction"""
@@ -75,6 +85,6 @@ class Junction(datasets.GeneratorBasedBuilder):
             label = os.path.splitext(label_file)[0]
             for i, sample in enumerate(lines):
                 yield f"{label}_{i}", {
-                    "text": sample,
+                    "text": refine_string(sample.lower()),
                     "label": label,
                 }
